@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ClinkedIn: The Inmate Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --clink-blue: #1b2a49; /* Dark, professional blue */
+            --clink-orange: #ff7f41; /* Contrast color for warnings/services */
+            --clink-bg: #f5f7fa; /* Light background */
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--clink-bg);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 1rem;
+        }
+        .profile-card {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            max-width: 450px;
+            width: 100%;
+            overflow: hidden;
+            border: 2px solid var(--clink-blue);
+        }
+        .header-banner {
+            background-color: var(--clink-blue);
+            height: 80px;
+            position: relative;
+        }
+        .profile-pic-container {
+            position: absolute;
+            top: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 100px;
+            border-radius: 50%;
+            background-color: var(--clink-bg);
+            padding: 5px;
+            box-shadow: 0 0 0 5px white;
+        }
+        .profile-pic {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 3px solid var(--clink-orange);
+        }
+        .service-tag {
+            background-color: var(--clink-orange);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            display: inline-block;
+            transition: transform 0.1s;
+        }
+        .service-tag:hover {
+            transform: scale(1.05);
+        }
+        .button-clink {
+            background-color: var(--clink-orange);
+            color: white;
+            font-weight: 700;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            transition: background-color 0.2s, transform 0.1s;
+            box-shadow: 0 4px 6px -1px rgba(255, 127, 65, 0.5);
+        }
+        .button-clink:hover {
+            background-color: #e86a34; /* slightly darker orange */
+            transform: translateY(-1px);
+        }
+        .button-clink:active {
+            transform: translateY(1px);
+        }
+        .stat-label {
+            color: var(--clink-blue);
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="container mt-8 flex flex-col items-center">
+
+        <h1 class="text-3xl font-bold text-center text-gray-800 mb-6">
+            <span style="color: var(--clink-blue);">Clinked</span><span style="color: var(--clink-orange);">In</span>
+        </h1>
+        <p class="text-center text-gray-600 mb-8 max-w-sm">The Professional Network for Incarcerated Professionals.</p>
+
+        <button id="generate-btn" class="button-clink mb-8">
+            Generate New Clinker Profile
+        </button>
+
+        <div id="profile-output" class="profile-card">
+            <!-- Profile content will be injected here -->
+        </div>
+
+    </div>
+
+    <script>
+        // Array of satirical data for generating profiles
+        const NAMES = [
+            "Vinny 'The Knife' Romano", "Brenda 'Bones' Jenkins", "Silas 'Slick' Thompson", 
+            "Maria 'The Mixer' Sanchez", "Gary 'Grit' O'Connell", "Tasha 'Trigger' Lee", 
+            "Jackson 'J-Money' Cole", "Priya 'The Planner' Sharma"
+        ];
+        const CRIMES = [
+            "Insider Trading (Market Manipulation)", "Grand Theft Auto (Enhanced)", 
+            "Felony Tax Evasion (Level 3)", "Unlicensed Practice of Medicine (Botox)", 
+            "Possession of Contraband Spoons (Repeated Offense)", "Misappropriation of Office Supplies (Paperclips)",
+            "Aggravated Jaywalking (Resisting Arrest)", "Illegal Distribution of Mixtapes (Without Proper Licensing)"
+        ];
+        const SERVICES = [
+            "Advanced Laundry (Starch Expert)", "Custom Tattoo Parlor (Single Needle)",
+            "Library Book Runner (Priority Access)", "Security Consultation (Threat Assessment)",
+            "Coffee Brewing (Espresso Equivalent)", "Sentence Negotiation Advice",
+            "Shank Sharpening (Precision Grinding)", "Emotional Support (Certified Listener)"
+        ];
+        const SENTENCE_STATUS = [
+            "Minimum Security", "Maximum Security", "Work Release Candidate", "Parole Pending Review"
+        ];
+        const GENDERS = [
+            { name: "male", image: "https://placehold.co/100x100/1b2a49/ffffff?text=M" },
+            { name: "female", image: "https://placehold.co/100x100/ff7f41/ffffff?text=F" }
+        ];
+
+        // Utility function to get a random item from an array
+        const getRandom = (arr) => arr[Math.floor(Math.random() * arr.length)];
+
+        // Utility function to generate a random date in the future
+        const getRandomReleaseDate = () => {
+            const today = new Date();
+            const future = new Date(today.getTime() + Math.random() * (365 * 5 * 24 * 60 * 60 * 1000)); // Up to 5 years
+            return future.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+        };
+
+        // Utility function to generate a random selection of services
+        const getRandomServices = () => {
+            const serviceCount = Math.floor(Math.random() * 3) + 2; // 2 to 4 services
+            const services = [];
+            const serviceCopy = [...SERVICES]; 
+            for (let i = 0; i < serviceCount; i++) {
+                if (serviceCopy.length === 0) break;
+                const randomIndex = Math.floor(Math.random() * serviceCopy.length);
+                services.push(serviceCopy.splice(randomIndex, 1)[0]);
+            }
+            return services;
+        };
+
+        const generateProfile = () => {
+            const name = getRandom(NAMES);
+            const inmateId = "Clink-" + Math.floor(1000 + Math.random() * 9000);
+            const crime = getRandom(CRIMES);
+            const status = getRandom(SENTENCE_STATUS);
+            const releaseDate = getRandomReleaseDate();
+            const genderData = getRandom(GENDERS);
+            const services = getRandomServices();
+
+            const profileHtml = `
+                <div class="header-banner">
+                    <div class="profile-pic-container">
+                        <img src="${genderData.image}" 
+                             alt="${name}'s Profile Picture" 
+                             class="profile-pic"
+                             onerror="this.onerror=null; this.src='https://placehold.co/100x100/1b2a49/ffffff?text=M'"
+                             >
+                    </div>
+                </div>
+                <div class="p-4 pt-16 text-center">
+                    <h2 class="text-2xl font-bold text-gray-900">${name}</h2>
+                    <p class="text-sm text-gray-500 mb-4">${inmateId} | ${status}</p>
+
+                    <!-- Professional Summary / Crime -->
+                    <div class="text-left mb-6 p-4 rounded-lg bg-gray-50 border border-gray-200">
+                        <p class="text-sm stat-label mb-1">Primary Area of Expertise (Conviction):</p>
+                        <p class="text-base text-gray-700 font-semibold">${crime}</p>
+                    </div>
+
+                    <!-- Statistics Block -->
+                    <div class="flex justify-between items-center mb-6 p-2 border-b border-gray-100">
+                        <div class="text-center">
+                            <div class="stat-label text-lg">${Math.floor(Math.random() * 50) + 1}</div>
+                            <div class="text-xs text-gray-500">Connections</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="stat-label text-lg">${Math.floor(Math.random() * 10) + 1}</div>
+                            <div class="text-xs text-gray-500">Recommendations</div>
+                        </div>
+                        <div class="text-center">
+                            <div class="stat-label text-lg">${Math.floor(Math.random() * 200) + 50}</div>
+                            <div class="text-xs text-gray-500">Days Served</div>
+                        </div>
+                    </div>
+
+                    <!-- Sentence & Release -->
+                    <div class="text-left mb-6">
+                        <p class="stat-label mb-2">Sentence Status:</p>
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded-md">
+                            <p class="text-sm text-blue-700">
+                                Projected Release Date: 
+                                <span class="font-bold">${releaseDate}</span>
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- In-Clinked Services -->
+                    <div class="text-left mb-4">
+                        <p class="stat-label mb-3">In-Clinked Services (Skills):</p>
+                        <div class="flex flex-wrap gap-2">
+                            ${services.map(service => `<span class="service-tag">${service}</span>`).join('')}
+                        </div>
+                    </div>
+                    
+                </div>
+            `;
+            document.getElementById('profile-output').innerHTML = profileHtml;
+        };
+
+        // Event listener and initial load
+        document.addEventListener('DOMContentLoaded', () => {
+            const generateBtn = document.getElementById('generate-btn');
+            generateBtn.addEventListener('click', generateProfile);
+
+            // Generate first profile on load
+            generateProfile();
+        });
+    </script>
+</body>
+</html>
